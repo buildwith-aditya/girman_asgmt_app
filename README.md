@@ -1,33 +1,61 @@
-### Girman Asgmt App
+* * * * *
 
-Assignment
+📘 Frappe HRMS Assignment -- Girman Technologies
+===============================================
 
-### Installation
+📌 Overview
+-----------
 
-You can install this app using the [bench](https://github.com/frappe/bench) CLI:
+This repository contains my submission for the **Frappe Developer Assignment** (Girman Technologies).\
+It demonstrates customizations in ERPNext HRMS module covering **Recruitment, Employee Lifecycle, Payroll, Taxation, and Custom Doctypes**, along with **Git best practices**.
+
+* * * * *
+
+⚙️ Setup Instructions
+---------------------
+
+### Prerequisites
+
+-   Python 3.10+
+
+-   Node.js & Yarn
+
+-   Redis, MariaDB, wkhtmltopdf
+
+-   Bench CLI
+
+### Steps to Install
 
 ```bash
-cd $PATH_TO_YOUR_BENCH
-bench get-app $URL_OF_THIS_REPO --branch develop
-bench install-app girman_asgmt_app
+# Clone repo
+git clone https://github.com/<your-username>/<repo-name>.git
+cd <repo-name>
+
+# Setup bench environment
+bench init frappe-bench
+cd frappe-bench
+
+# Get apps
+bench get-app erpnext
+bench get-app hrms
+bench get-app <this-repo>
+
+# Create site
+bench new-site hrms.local
+bench --site hrms.local install-app erpnext hrms <this-repo>
+
+# Start server
+bench start
+
 ```
 
-### Contributing
+### Demo Credentials
 
-This app uses `pre-commit` for code formatting and linting. Please [install pre-commit](https://pre-commit.com/#installation) and enable it for this repository:
+| Role | Username | Password |
+| --- | --- | --- |
+| Administrator | `administrator` | `admin` |
+| HR Manager | `hr.manager` | `password123` |
+| Interviewer | `interviewer` | `password123` |
+| Hiring Manager | `hiring.manager` | `password123` |
 
-```bash
-cd apps/girman_asgmt_app
-pre-commit install
-```
-
-Pre-commit is configured to use the following tools for checking and formatting your code:
-
-- ruff
-- eslint
-- prettier
-- pyupgrade
-
-### License
-
-mit
+* * * * *
