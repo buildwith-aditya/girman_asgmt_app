@@ -137,13 +137,13 @@ app_license = "mit"
 # ---------------
 # Hook on document methods and events
 
-# doc_events = {
-# 	"*": {
-# 		"on_update": "method",
-# 		"on_cancel": "method",
-# 		"on_trash": "method"
-# 	}
-# }
+doc_events = {
+    "Employee": {
+        "after_insert": "girman_asgmt_app.events.employee.on_employee_after_insert",
+        "on_update": "girman_asgmt_app.events.employee.on_employee_on_update",
+        "after_save": "girman_asgmt_app.events.employee.on_employee_after_save",
+    }
+}
 
 # Scheduled Tasks
 # ---------------
