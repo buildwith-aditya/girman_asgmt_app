@@ -5,6 +5,7 @@ from frappe.utils import add_days, getdate, nowdate
 # Configuration / constants
 # ----------------------------
 DEFAULT_PROBATION_DAYS = 90
+DEFAULT_PRINT_FORMAT = "Experience Letter"
 
 
 # ----------------------------
@@ -127,6 +128,80 @@ def _handle_exited(doc):
             _safe_db_set(doc, "relieving_date", nowdate())
         _safe_db_set(doc, "status", "Left")
 
+        file_doc = _generate_experience_letter_and_attach(doc)
+        if file_doc:
+            _safe_db_set(doc, "experience_letter", file_doc.file_url)
+
     except Exception:
         frappe.log_error(frappe.get_traceback(), "employee._handle_exited")
 
+
+# ----------------------------
+# PDF generation helper
+# ----------------------------
+def _generate_experience_letter_and_attach(employee_doc, print_format_name=None, is_private=1):
+    """
+    Render a print format as PDF and attach it as a File to the Employee.
+    Returns the File doc or None on failure.
+
+    - employee_doc: frappe document for Employee (frappe.get_doc("Employee", name) or the event doc)
+    - print_format_name: name of the Print Format to use (defaults to DEFAULT_PRINT_FORMAT)
+    - is_private: 1 -> private (/private/files), 0 -> public (/public/files)
+    """
+    if not employee_doc:
+        frappe.log_error("employee_doc is falsy", "employee._generate_experience_letter_and_attach")
+        return None
+
+    print_format = print_format_name or DEFAULT_PRINT_FORMAT
+
+    try:
+        pdf_bytes = frappe.get_print(
+            doctype="Employee",
+            name=employee_doc.name,
+            print_format=print_format,
+            as_pdf=True,
+        )
+
+        if not pdf_bytes:
+            frappe.log_error(
+                f"Empty PDF bytes returned for Employee {employee_doc.name} using print format '{print_format}'",
+                "employee._generate_experience_letter_and_attach",
+            )
+            return None
+
+        if isinstance(pdf_bytes, str):
+            pdf_bytes = pdf_bytes.encode("utf-8")
+
+        fname = f"Experience_Letter_{employee_doc.name}_{nowdate()}.pdf"
+
+        existing_file = frappe.db.get_value(
+            "File",
+            {"file_name": fname, "attached_to_doctype": "Employee", "attached_to_name": employee_doc.name},
+            "name",
+        )
+        if existing_file:
+            try:
+                frappe.get_doc("File", existing_file).delete(ignore_permissions=True)
+            except Exception:
+                frappe.log_error(
+                    frappe.get_traceback(),
+                    "employee._generate_experience_letter_and_attach - deleting existing file",
+                )
+
+        file_doc = frappe.get_doc(
+            {
+                "doctype": "File",
+                "file_name": fname,
+                "is_private": int(bool(is_private)),
+                "attached_to_doctype": "Employee",
+                "attached_to_name": employee_doc.name,
+                "content": pdf_bytes,
+            }
+        ).insert(ignore_permissions=True)
+
+        frappe.db.commit()
+        return file_doc
+
+    except Exception:
+        frappe.log_error(frappe.get_traceback(), "employee._generate_experience_letter_and_attach")
+        return None
