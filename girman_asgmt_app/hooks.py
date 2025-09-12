@@ -13,6 +13,7 @@ required_apps = ["erpnext", "hrms"]
 fixtures = [
     {"dt": "Letter Head"},
      {"dt": "Salary Component"},
+     {"dt": "Salary Structure", "filters": [["name", "like", "DEMO -%"]]}
 ]
 
 # Each item in the list will be shown as an app in the apps page
