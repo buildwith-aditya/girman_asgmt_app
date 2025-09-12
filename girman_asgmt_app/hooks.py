@@ -11,7 +11,8 @@ app_license = "mit"
 required_apps = ["erpnext", "hrms"]
 
 fixtures = [
-    {"dt": "Letter Head"}
+    {"dt": "Letter Head"},
+     {"dt": "Salary Component"},
 ]
 
 # Each item in the list will be shown as an app in the apps page
