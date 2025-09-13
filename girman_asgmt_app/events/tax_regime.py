@@ -9,6 +9,63 @@ REGIME_TO_STRUCTURE = {
 }
 ALLOWED_STRUCTURES = set(REGIME_TO_STRUCTURE.values())
 
+def get_employee_regime(employee):
+    """Return the value of tax_regime_preference for employee, fallback to Old Regime."""
+    if not employee:
+        return None
+    emp = frappe.get_cached_doc("Employee", employee)
+    return emp.get("tax_regime_preference") or "Old Regime"
+
+def set_salary_structure_for_employee(doc, method=None):
+    """
+    Hook: before_insert on Salary Slip.
+    Sets doc.salary_structure based on employee tax regime preference.
+    """
+
+    # Ensure we have an employee
+    if not getattr(doc, "employee", None):
+        return
+
+    # Get employee's tax regime
+    regime = get_employee_regime(doc.employee)
+
+    expected_structure = REGIME_TO_STRUCTURE.get(regime)
+
+    if not expected_structure:
+        # Fail early if mapping missing
+        frappe.log_error(message=f"Unknown mapping for tax regime: {regime}", title="Tax Regime Mapping Missing")
+        return
+
+    # Only set if not set or different
+    current_structure = doc.get("salary_structure")
+    if not current_structure or current_structure != expected_structure:
+        doc.salary_structure = expected_structure
+
+        # Clear earnings and deductions so calculation repopulates
+        try:
+            if hasattr(doc, "earnings"):
+                doc.earnings = []
+            if hasattr(doc, "deductions"):
+                doc.deductions = []
+        except Exception as e:
+            frappe.log_error(message=str(e), title="Error Clearing Salary Slip Tables")
+    else:
+        frappe.log_error(message="Salary structure already correct. No changes made.", title="Salary Structure Already Correct")
+
+
+def ensure_salary_structure_matches_regime(doc, method=None):
+    """Hook: validate on Salary Slip. Prevent mismatched structure vs employee preference."""
+    if not getattr(doc, "employee", None):
+        return
+
+    regime = get_employee_regime(doc.employee)
+    expected_structure = REGIME_TO_STRUCTURE.get(regime)
+
+    if expected_structure and doc.get("salary_structure") and doc.get("salary_structure") != expected_structure:
+        frappe.throw(_("Salary Structure '{0}' does not match employee {1}'s Tax Regime Preference ({2}). Expected: {3}")
+                     .format(doc.get("salary_structure"), doc.employee, regime, expected_structure))
+
+
 
 def validate_salary_structure_assignment(doc, method=None):
     """
