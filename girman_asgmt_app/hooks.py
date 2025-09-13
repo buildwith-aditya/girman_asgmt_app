@@ -156,6 +156,9 @@ doc_events = {
     "Salary Structure Assignment": {
         "validate": "girman_asgmt_app.events.tax_regime.validate_salary_structure_assignment",
     },
+    "Payroll Entry": {
+        "before_submit": "girman_asgmt_app.events.tax_regime.ensure_payroll_slips_match_regime",
+    }
 }
 
 # Scheduled Tasks
