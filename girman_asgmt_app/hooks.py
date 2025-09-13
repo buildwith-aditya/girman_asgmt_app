@@ -150,7 +150,10 @@ doc_events = {
         "after_save": "girman_asgmt_app.events.employee.on_employee_after_save",
     },
     "Salary Slip": {
-        "validate": "girman_asgmt_app.events.tax_regime.ensure_salary_structure_matches_regime",
+        "validate": [
+            "girman_asgmt_app.events.tax_regime.ensure_salary_structure_matches_regime",
+            "girman_asgmt_app.events.payroll.adjust_salary_slip_with_investments"
+        ],
         "before_save": "girman_asgmt_app.events.tax_regime.set_salary_structure_for_employee",
     },
     "Salary Structure Assignment": {
