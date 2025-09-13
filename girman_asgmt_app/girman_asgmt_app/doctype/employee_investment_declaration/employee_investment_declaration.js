@@ -1,13 +1,6 @@
-// employee_investment_declaration.js
-// Client-side form script for Employee Investment Declaration
-// Realtime calculation of total_exemption and client-side caps warnings
-
 frappe.ui.form.on("Employee Investment Declaration", {
     refresh: function(frm) {
-        // set total_exemption read-only visually (json already sets read_only)
         frm.set_df_property("total_exemption", "read_only", 1);
-
-        // show small help text / hint
         frm.set_intro("Enter employee investment amounts for the selected fiscal year. Total is auto-calculated.");
 
         // recompute on refresh (useful when form is loaded)
@@ -20,7 +13,6 @@ frappe.ui.form.on("Employee Investment Declaration", {
 
 });
 
-// helper: compute total_exemption and set on form
 function compute_total(frm) {
     const a = flt(frm.doc.section_80c_amount, 2);
     const b = flt(frm.doc.section_80d_amount, 2);
@@ -29,7 +21,6 @@ function compute_total(frm) {
 
     frm.set_value("total_exemption", total);
 
-    // Show warnings if limits crossed
     const CAP_80C = 150000;
     const CAP_80D = 50000;
     let warn_messages = [];
@@ -49,8 +40,6 @@ function compute_total(frm) {
     }
 }
 
-
-// Safe float conversion
 function flt(v, precision) {
     v = parseFloat(v || 0);
     if (isNaN(v)) v = 0;
@@ -61,14 +50,11 @@ function flt(v, precision) {
     return v;
 }
 
-// Safe currency formatter
 function format_currency(v) {
     if (frappe && frappe.format && frappe.meta) {
-        // newer Frappe versions
         return frappe.format(v, {fieldtype: "Currency"});
     }
     if (window.format_currency) {
-        // fallback (older global function)
         return window.format_currency(v);
     }
     return v.toString();
