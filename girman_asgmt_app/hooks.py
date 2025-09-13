@@ -49,7 +49,7 @@ fixtures = [
 # page_js = {"page" : "public/js/file.js"}
 
 # include js in doctype views
-# doctype_js = {"doctype" : "public/js/doctype.js"}
+doctype_js = {"Salary Structure Assignment" : "public/js/doctypes/salary_structure_assignment.js"}
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
@@ -148,7 +148,10 @@ doc_events = {
         "after_insert": "girman_asgmt_app.events.employee.on_employee_after_insert",
         "on_update": "girman_asgmt_app.events.employee.on_employee_on_update",
         "after_save": "girman_asgmt_app.events.employee.on_employee_after_save",
-    }
+    },
+    "Salary Structure Assignment": {
+        "validate": "girman_asgmt_app.events.tax_regime.validate_salary_structure_assignment",
+    },
 }
 
 # Scheduled Tasks
